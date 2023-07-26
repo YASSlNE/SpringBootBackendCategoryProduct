@@ -15,6 +15,11 @@ import java.util.List;
 @Builder
 @Table(name="category")
 public class Category {
+    public Category(int id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
