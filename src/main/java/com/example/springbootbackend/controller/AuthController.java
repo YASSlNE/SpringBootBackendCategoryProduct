@@ -10,6 +10,7 @@ import com.example.springbootbackend.model.Role;
 import com.example.springbootbackend.model.User;
 import com.example.springbootbackend.payload.request.LoginRequest;
 import com.example.springbootbackend.payload.request.SignupRequest;
+import com.example.springbootbackend.payload.response.JwtResponse;
 import com.example.springbootbackend.payload.response.MessageResponse;
 import com.example.springbootbackend.payload.response.UserInfoResponse;
 import com.example.springbootbackend.repository.RoleRepository;
@@ -17,12 +18,12 @@ import com.example.springbootbackend.repository.UserRepository;
 import com.example.springbootbackend.security.jwt.JwtUtils;
 import com.example.springbootbackend.service.CategoryService;
 import com.example.springbootbackend.service.UserDetailsImpl;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,18 +31,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+//import org.springframework.web.bind.annotation.RestController;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.example.springbootbackend.security.jwt.JwtUtils.logger;
 
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "http://localhost:8081", maxAge = 3600, allowCredentials="true")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -60,10 +59,11 @@ public class AuthController {
 
     @Autowired
     JwtUtils jwtUtils;
-
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         try {
+            logger.info("Authenticating user: {}", loginRequest.getUsername());
+
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
@@ -71,21 +71,31 @@ public class AuthController {
 
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-            ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+            String jwt = jwtUtils.generateTokenFromUserDetails(userDetails);
+
+            logger.info("Generated JWT token for user: {}", userDetails.getUsername());
 
             List<String> roles = userDetails.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toList());
 
-            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                    .body(new UserInfoResponse(userDetails.getId(),
-                            userDetails.getUsername(),
-                            userDetails.getEmail(),
-                            roles));
+            logger.info("User roles: {}", roles);
+
+            // Return the JWT token directly in the response body
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
+                    .body(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
         } catch (BadCredentialsException ex) {
+            // Reduce log level for BadCredentialsException to WARN
+            logger.warn("BadCredentialsException during authentication for user: {}", loginRequest.getUsername());
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid username or password!"));
+        } catch (Exception ex) {
+            logger.error("An unexpected error occurred during authentication: {}", ex.getMessage(), ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("An unexpected error occurred. Please try again later."));
         }
     }
+
+
 
 
     @PostMapping("/signup")
@@ -112,6 +122,7 @@ public class AuthController {
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null) {
+            System.out.println("NULL ROLE");
             Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found. 1"));
             roles.add(userRole);
@@ -144,10 +155,12 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
+
     @PostMapping("/signout")
-    public ResponseEntity<?> logoutUser() {
-        ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new MessageResponse("You've been signed out!"));
+    public ResponseEntity<?> signoutUser(){
+        System.out.println("Logging out...");
+        return ResponseEntity.ok(new MessageResponse("Signout succesfull"));
     }
+
+
 }

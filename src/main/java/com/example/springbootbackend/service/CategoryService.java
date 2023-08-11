@@ -34,13 +34,6 @@ public class CategoryService {
     }
 
     public Category getCategoryById(Integer id) {
-
-
-//        logger.debug("debug message.");
-//        logger.info("info message.");
-//        logger.warn("warning message.");
-//        logger.error("error message.");
-
         return catRepo.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Category " + id + " not found"));
     }

@@ -1,7 +1,10 @@
 package com.example.springbootbackend.security.jwt;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.example.springbootbackend.service.UserDetailsImpl;
 import jakarta.servlet.http.Cookie;
@@ -22,7 +25,7 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtils {
-    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+    public static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
     @Value("${test.app.jwtSecret}")
     private String jwtSecret;
@@ -87,4 +90,30 @@ public class JwtUtils {
                 .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
+    public List<String> getUserRolesFromJwtToken(String token) {
+        Claims claims = Jwts.parserBuilder().setSigningKey(key()).build()
+                .parseClaimsJws(token).getBody();
+        return (List<String>) claims.get("roles");
+    }
+
+
+    public String generateTokenFromUserDetails(UserDetailsImpl userDetails) {
+        Claims claims = Jwts.claims().setSubject(userDetails.getUsername());
+        claims.put("roles", userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
+
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + jwtExpirationMs);
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(expiration)
+                .signWith(key(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+
+
+
 }
