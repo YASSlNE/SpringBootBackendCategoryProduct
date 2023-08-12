@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 import static com.example.springbootbackend.security.jwt.JwtUtils.logger;
 
 
-@CrossOrigin(origins = "http://localhost:8081", maxAge = 3600, allowCredentials="true")
+@CrossOrigin(origins = "http://localhost:8081")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

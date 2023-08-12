@@ -16,11 +16,14 @@ public class ProblemController {
     private final Logger logger = LogManager.getLogger(ProblemController.class); // Initialize logger
     @Autowired
     public ProblemController(ProblemService problemService) {
+        logger.info("Get all problems==================||=====================================");
+
         this.problemService = problemService;
     }
 
     @GetMapping
     public List<Problem> getAllProblems() {
+        logger.info("Get all problems=======================================================");
         return problemService.getAllProblems();
     }
 
