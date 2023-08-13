@@ -26,16 +26,19 @@ public class ProblemController {
         logger.info("Get all problems=======================================================");
         return problemService.getAllProblems();
     }
-
-
     @GetMapping("{id}")
     public Problem getProblemById(@PathVariable Integer id) {
         return problemService.getProblemById(id);
     }
-
-    @PostMapping("create")
-    public Problem createProblem(@RequestBody Problem problem) {
-        return problemService.createProblem(problem);
+    @GetMapping("user/{username}")
+    public List<Problem> getProblemsByUser(@PathVariable String username) {
+        logger.info("==================getProblemsByUser {}=====================================", username);
+        return problemService.getProblemsByUser(username);
+    }
+    @PostMapping("create/{username}")
+    public Problem createProblem(@PathVariable String username, @RequestBody Problem problem) {
+        logger.info("============================A7A====================================================");
+        return problemService.createProblem(username, problem);
     }
 
     @PutMapping("{id}")

@@ -22,4 +22,10 @@ public class Problem {
     @JsonIgnoreProperties("problem")
     @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL)
     private List<Solution> solutions;
+
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
 }
