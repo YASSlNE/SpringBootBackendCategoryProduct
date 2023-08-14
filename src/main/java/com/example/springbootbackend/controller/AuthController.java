@@ -162,5 +162,11 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("Signout succesfull"));
     }
 
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id){
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Error: User is not found."));
+        return ResponseEntity.ok(new UserInfoResponse(user.getUsername(), user.getEmail()));
+    }
+
 
 }

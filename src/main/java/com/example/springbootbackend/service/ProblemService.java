@@ -23,6 +23,17 @@ public class ProblemService {
         this.userRepository = userRepository;
     }
 
+
+    public User getUserByProblem(Integer id) {
+        logger.info("==========================Getting user by problem {}=======================================================", id);
+        Problem problem = problemRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("Problem " + id + " not found"));
+        return userRepository.findById(problem.getUser().getId()).orElseThrow(
+                () -> new RuntimeException("User " + problem.getUser().getId() + " not found"));
+    }
+
+
+
     public Problem createProblem(String username, Problem problem) {
         logger.info("==========================Creating problem for user {}=======================================================", username);
         User user = userRepository.findByUsername(username).orElseThrow(
@@ -30,6 +41,10 @@ public class ProblemService {
         problem.setUser(user);
         return problemRepository.save(problem);
     }
+
+
+
+
     public List<Problem> getAllProblems() {
         return problemRepository.findAll();
     }

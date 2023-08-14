@@ -1,5 +1,6 @@
 package com.example.springbootbackend.controller;
 import com.example.springbootbackend.model.Problem;
+import com.example.springbootbackend.model.User;
 import com.example.springbootbackend.service.ProblemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +36,16 @@ public class ProblemController {
         logger.info("==================getProblemsByUser {}=====================================", username);
         return problemService.getProblemsByUser(username);
     }
+
+    @GetMapping("id/{id}")
+    public User getUsernameByProblem(@PathVariable Integer id) {
+        logger.info("==================getUserByProblem {}=====================================", id);
+        return problemService.getUserByProblem(id);
+    }
+
+
+
+
     @PostMapping("create/{username}")
     public Problem createProblem(@PathVariable String username, @RequestBody Problem problem) {
         logger.info("============================A7A====================================================");
