@@ -57,10 +57,17 @@ public class ProblemService {
         problem.setDescription(updatedProblemDetails.getDescription());
         return problemRepository.save(problem);
     }
-    public void deleteProblem(Integer id) {
+    public boolean deleteProblem(Integer id) {
         Problem problem = getProblemById(id);
-        problemRepository.delete(problem);
+
+        if (problem != null) {
+            problemRepository.delete(problem);
+            return true; // Problem deleted successfully
+        } else {
+            return false; // Problem not found
+        }
     }
+
 
     public List<Problem> getProblemsByUser(String username) {
         User user = userRepository.findByUsername(username).orElseThrow(

@@ -1,24 +1,32 @@
 package com.example.springbootbackend.controller;
 import com.example.springbootbackend.model.Problem;
 import com.example.springbootbackend.model.User;
+import com.example.springbootbackend.repository.UserRepository;
 import com.example.springbootbackend.service.ProblemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/problem")
 public class ProblemController {
 
+    private final UserRepository userRepository;
     private final ProblemService problemService;
     private final Logger logger = LogManager.getLogger(ProblemController.class); // Initialize logger
     @Autowired
-    public ProblemController(ProblemService problemService) {
+    public ProblemController(ProblemService problemService, UserRepository userRepository) {
         logger.info("Get all problems==================||=====================================");
-
+        this.userRepository = userRepository;
         this.problemService = problemService;
     }
 
@@ -46,10 +54,11 @@ public class ProblemController {
 
 
 
-    @PostMapping("create/{username}")
-    public Problem createProblem(@PathVariable String username, @RequestBody Problem problem) {
-        logger.info("============================A7A====================================================");
-        return problemService.createProblem(username, problem);
+    @PostMapping("create")
+    public Problem createProblem(@RequestBody Problem problem) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Optional<User> user =  userRepository.findByUsername(auth.getName());
+        return problemService.createProblem(user.get().getUsername(), problem);
     }
 
     @PutMapping("{id}")
@@ -57,10 +66,18 @@ public class ProblemController {
         return problemService.updateProblem(id, updatedProblemDetails);
     }
 
-    @PostMapping("{id}")
-    public void deleteProblem(@PathVariable Integer id) {
-        problemService.deleteProblem(id);
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<?> deleteProblem(@PathVariable Integer id) {
+        logger.info("=====================================deleting problem number {}", id);
+        boolean isDeleted = problemService.deleteProblem(id);
+
+        if (isDeleted) {
+            return ResponseEntity.ok("{\"message\": \"Problem with ID " + id + " has been successfully deleted.\"}");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Problem with ID " + id + " not found.");
+        }
     }
+
 
 
 
