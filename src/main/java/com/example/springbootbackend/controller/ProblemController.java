@@ -61,7 +61,7 @@ public class ProblemController {
         return problemService.createProblem(user.get().getUsername(), problem);
     }
 
-    @PutMapping("{id}")
+    @PutMapping("update/{id}")
     public Problem updateProblem(@PathVariable Integer id,@RequestBody Problem updatedProblemDetails) {
         return problemService.updateProblem(id, updatedProblemDetails);
     }
