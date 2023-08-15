@@ -26,6 +26,10 @@ public class SolutionController {
         return solutionService.getSolutionById(id);
     }
 
+    @GetMapping("problem/{id}")
+    public List<Solution> getSolutionsByProblemId(@PathVariable Integer id){
+        return solutionService.getSolutionsByProblemId(id);
+    }
 
     @PutMapping("{id}")
     public Solution updateSolution(@PathVariable Integer id,@RequestBody Solution updatedSolutionDetails) {

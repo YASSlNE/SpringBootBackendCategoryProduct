@@ -47,4 +47,10 @@ public class SolutionService {
         solutionRepo.delete(solution);
     }
 
+
+    public List<Solution> getSolutionsByProblemId(Integer id) {
+        Problem problem = problemRepo.findById(id).orElseThrow(
+                () -> new RuntimeException("Problem " + id + " not found"));
+        return solutionRepo.findByProblem(problem);
+    }
 }
