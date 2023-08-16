@@ -42,9 +42,19 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
+
     @JsonIgnoreProperties("user")
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Problem> problems;
+
+    @JsonIgnoreProperties("upvotingUsers")
+    @ManyToMany
+    @JoinTable(name = "user_upvoted_solutions",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "solution_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "solution_id"})) // Adding a unique constraint
+    private List<Solution> upvotedSolutions;
+
 
     public User() {
     }
@@ -95,4 +105,6 @@ public class User {
     public Set<Role> getRoles() {
         return this.roles;
     }
+
+
 }

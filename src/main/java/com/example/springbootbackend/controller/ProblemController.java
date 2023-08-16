@@ -56,9 +56,8 @@ public class ProblemController {
 
     @PostMapping("create")
     public Problem createProblem(@RequestBody Problem problem) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Optional<User> user =  userRepository.findByUsername(auth.getName());
-        return problemService.createProblem(user.get().getUsername(), problem);
+
+        return problemService.createProblem(problem);
     }
 
     @PutMapping("update/{id}")

@@ -7,9 +7,12 @@ import com.example.springbootbackend.repository.UserRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,10 +38,13 @@ public class ProblemService {
 
 
 
-    public Problem createProblem(String username, Problem problem) {
-        logger.info("==========================Creating problem for user {}=======================================================", username);
-        User user = userRepository.findByUsername(username).orElseThrow(
-                () -> new RuntimeException("User " + username + " not found"));
+    public Problem createProblem(Problem problem) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Optional<User> getUser =  userRepository.findByUsername(auth.getName());
+
+        logger.info("==========================Creating problem for user {}=======================================================", getUser.get().getUsername());
+        User user = userRepository.findByUsername(getUser.get().getUsername()).orElseThrow(
+                () -> new RuntimeException("User " + getUser.get().getUsername() + " not found"));
         problem.setUser(user);
         problem.setDeleted(false);
         return problemRepository.save(problem);

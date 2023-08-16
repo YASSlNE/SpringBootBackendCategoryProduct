@@ -2,21 +2,32 @@ package com.example.springbootbackend.service;
 
 import com.example.springbootbackend.model.Problem;
 import com.example.springbootbackend.model.Solution;
+import com.example.springbootbackend.model.User;
 import com.example.springbootbackend.repository.ProblemRepo;
 import com.example.springbootbackend.repository.SolutionRepo;
+import com.example.springbootbackend.repository.UserRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SolutionService {
     private final SolutionRepo solutionRepo;
     private final ProblemRepo problemRepo;
+    private final UserRepository userRepository;
+    private final Logger logger = LogManager.getLogger(SolutionService.class);
+
     @Autowired
-    public SolutionService(SolutionRepo solutionRepo, ProblemRepo problemRepo) {
+    public SolutionService(SolutionRepo solutionRepo, ProblemRepo problemRepo, UserRepository userRepository){
         this.solutionRepo = solutionRepo;
         this.problemRepo = problemRepo;
+        this.userRepository = userRepository;
     }
 
     public Solution createSolution(Integer id, Solution solution) {
@@ -55,5 +66,18 @@ public class SolutionService {
         Problem problem = problemRepo.findById(id).orElseThrow(
                 () -> new RuntimeException("Problem " + id + " not found"));
         return solutionRepo.findByProblem(problem);
+    }
+
+
+    public void upVote(Integer id){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Optional<User> user =  userRepository.findByUsername(auth.getName());
+        logger.info("==========================Upvoting solution {}=======================================================", id);
+        Solution solution = solutionRepo.findById(id).orElseThrow(
+                () -> new RuntimeException("Solution "+id+ " not found"));
+        List<User> upvotingUsers = solution.getUpvotingUsers();
+        upvotingUsers.add(user.get());
+        solution.setScore(solution.getScore()+1);
+        solutionRepo.save(solution);
     }
 }
