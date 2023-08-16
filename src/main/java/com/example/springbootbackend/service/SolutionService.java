@@ -23,6 +23,7 @@ public class SolutionService {
         Problem problem = problemRepo.findById(id).orElseThrow(
                 () -> new RuntimeException("Problem " + id + " not found"));
         solution.setProblem(problem);
+        solution.setDeleted(false);
         return solutionRepo.save(solution);
     }
 
@@ -44,7 +45,9 @@ public class SolutionService {
 
     public void deleteSolution(Integer id){
         Solution solution = getSolutionById(id);
-        solutionRepo.delete(solution);
+//        solutionRepo.delete(solution);
+        solution.setDeleted(true);
+        solutionRepo.save(solution);
     }
 
 

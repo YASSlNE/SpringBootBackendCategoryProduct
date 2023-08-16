@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+
 import java.util.List;
 
 @Builder
@@ -18,7 +20,7 @@ public class Problem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String description;
-
+    private boolean isDeleted;
     @JsonIgnoreProperties("problem")
     @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL)
     private List<Solution> solutions;

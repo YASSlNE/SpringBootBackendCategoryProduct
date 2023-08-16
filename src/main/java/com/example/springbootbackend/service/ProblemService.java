@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProblemService {
@@ -39,6 +40,7 @@ public class ProblemService {
         User user = userRepository.findByUsername(username).orElseThrow(
                 () -> new RuntimeException("User " + username + " not found"));
         problem.setUser(user);
+        problem.setDeleted(false);
         return problemRepository.save(problem);
     }
 
@@ -46,7 +48,10 @@ public class ProblemService {
 
 
     public List<Problem> getAllProblems() {
-        return problemRepository.findAll();
+        List<Problem> all =  problemRepository.findAll();
+        return all.stream()
+                .filter(problem -> !problem.isDeleted())
+                .collect(Collectors.toList());
     }
     public Problem getProblemById(Integer id) {
         return problemRepository.findById(id).orElseThrow(
@@ -59,12 +64,13 @@ public class ProblemService {
     }
     public boolean deleteProblem(Integer id) {
         Problem problem = getProblemById(id);
-
         if (problem != null) {
-            problemRepository.delete(problem);
-            return true; // Problem deleted successfully
+//            problemRepository.delete(problem);
+            problem.setDeleted(true);
+            problemRepository.save(problem);
+            return true;
         } else {
-            return false; // Problem not found
+            return false;
         }
     }
 

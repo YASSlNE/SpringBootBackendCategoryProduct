@@ -18,6 +18,7 @@ public class Solution {
     private String code;
     private String description;
     private String language;
+    private boolean isDeleted;
     @ManyToOne
     @JsonIgnoreProperties("solutions")
     @JoinColumn(name = "problem_id")
