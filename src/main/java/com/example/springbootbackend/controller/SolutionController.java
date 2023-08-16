@@ -56,4 +56,9 @@ public class SolutionController {
         solutionService.upVote(id);
     }
 
+    @PutMapping("downVote/{id}")
+    public void downVote(@PathVariable Integer id){
+        solutionService.downVote(id);
+    }
+
 }

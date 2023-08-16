@@ -80,4 +80,16 @@ public class SolutionService {
         solution.setScore(solution.getScore()+1);
         solutionRepo.save(solution);
     }
+
+    public void downVote(Integer id){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Optional<User> user = userRepository.findByUsername(auth.getName());
+        logger.info("==========================Downvoting solution {}=======================================================", id);
+        Solution solution = solutionRepo.findById(id).orElseThrow(
+                () -> new RuntimeException("Solution "+id+ " not found"));
+        List<User> upvotingUsers = solution.getUpvotingUsers();
+        upvotingUsers.remove(user.get());
+        solution.setScore(solution.getScore()-1);
+        solutionRepo.save(solution);
+    }
 }
