@@ -71,7 +71,7 @@ public class AuthController {
 
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-            String jwt = jwtUtils.generateTokenFromUserDetails(userDetails);
+            String jwt = jwtUtils.generateTokenFromUserDetails(userDetails, loginRequest.getRememberme());
 
             logger.info("Generated JWT token for user: {}", userDetails.getUsername());
 

@@ -98,11 +98,12 @@ public class JwtUtils {
     }
 
 
-    public String generateTokenFromUserDetails(UserDetailsImpl userDetails) {
+    public String generateTokenFromUserDetails(UserDetailsImpl userDetails, Boolean rememberMe) {
         Claims claims = Jwts.claims().setSubject(userDetails.getUsername());
         claims.put("roles", userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
 
         Date now = new Date();
+        jwtExpirationMs = rememberMe ? 604800000 : jwtExpirationMs;
         Date expiration = new Date(now.getTime() + jwtExpirationMs);
 
         return Jwts.builder()

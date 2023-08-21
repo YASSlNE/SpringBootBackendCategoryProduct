@@ -9,6 +9,16 @@ public class LoginRequest {
     @NotBlank
     private String password;
 
+    private Boolean rememberMe=false;
+
+    public Boolean getRememberme(){
+        return rememberMe;
+    }
+
+    public void setRememberme(Boolean rememberMe){
+        this.rememberMe = rememberMe;
+    }
+
     public String getUsername() {
         return username;
     }
